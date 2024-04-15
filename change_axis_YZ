@@ -1,0 +1,11 @@
+def change_axis():
+
+    if cmds.upAxis( q=True, axis=True ) == 'z':
+        
+        cmds.upAxis( ax='y' )
+        mel.eval('GoToDefaultView;')
+        
+    else:
+        
+        cmds.upAxis( ax='z' )
+        mel.eval('GoToDefaultView;')
