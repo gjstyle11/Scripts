@@ -1,0 +1,32 @@
+def zero_euler_filter(curves_to_filter=''):
+
+    if not curves_to_filter:
+        curves_to_filter = cmds.ls(sl=1)
+
+    all_frames_curves =[]    
+    for curve in curves_to_filter:
+        
+        for ch in 'tr':
+            for ax in 'xyz':
+                all_frames_with_keys = cmds.keyframe(curve, q=True, at = ch + ax, timeChange=True)
+            
+                if all_frames_with_keys:
+                    all_frames_curves.extend(all_frames_with_keys)
+                        
+            
+        if all_frames_curves:
+            
+            start  = min(all_frames_curves)
+            end = max(all_frames_curves)
+
+    cmds.setKeyframe(curves_to_filter, v = 0, t= [ start - 1 , start - 1])
+
+
+
+    cmds.filterCurve(curves_to_filter)
+
+
+    cmds.cutKey(curves_to_filter, t= (start - 1 , start - 1))
+
+
+    return curves_to_filter
