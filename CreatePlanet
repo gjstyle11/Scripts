@@ -1,0 +1,91 @@
+import maya.cmds as cmds
+import random
+
+def clear_scene():
+    all_spheres = cmds.ls(type = 'mesh')
+    all_spheres = cmds.listRelatives(all_spheres, parent=1)
+    
+    #all_group = cmds.ls(type = 'group')
+    #all_group = cmds.listRelatives(all_group, parent=1)
+    
+    
+    cmds.delete(all_spheres)
+    #cmds.delete(all_groups)
+
+def create_planet(planetRadiusMin = 3 ,planetRadiusMax = 6, planetName = "Earth", moonsMin = 2, moonsMax = 7, moonRadiusMin = 2, moonRadiusMax = 3):
+    clear_scene()        
+    #var    
+    #MOON_NAME = 'Moon'
+    min_rad_planet = int(planetRadiusMin)
+    max_rad_planet = int(planetRadiusMax)
+    GAP = random.uniform(2, 4)
+    moon_list = ["Moon", "Io", "Europa", "Ganymede", "Callisto", "Titan", "Triton", "Enceladus", "Mimas", "Rhea", "Dione", "Tethys", "Hyperion", "Iapetus", "Phoebe", "Miranda", "Ariel", "Umbriel", "Titania", "Oberon", "Charon", "Nereid", "Proteus", "Larissa", "Umbriel", "Dysnomia", "Puck", "Proteus", "Janus", "Epimetheus"]
+    moons_min = int(moonsMin)
+    moons_max = int(moonsMax)
+    moons = random.randint(moons_min, moons_max)
+    
+    #create Planet
+    cmds.polySphere(r=random.randint(min_rad_planet,max_rad_planet), n=planetName)
+    planetRadius = cmds.polySphere(planetName, q=1, r=1)
+    
+    #distance count
+    distance = planetRadius + GAP 
+    
+
+    for moon_number in range(1, moons+1):
+
+        #var        
+        rotate_z_random = random.uniform(-45, 45)
+        animate_offset = random.randint(1, 50)
+        
+        #create moon
+        moon = cmds.polySphere(r=random.uniform(moonRadiusMin, moonRadiusMax), n=random.choice(moon_list) + '_' +  str(moon_number))
+        moon_radius = cmds.polySphere(moon, q=1, r=1)
+        distance = distance + moon_radius + GAP
+        grp_name = cmds.ls(moon, l=1)[0]
+        cmds.xform(moon, t=[distance,  0, 0])        
+              
+        #create group
+        grp = cmds.group(empty = 1, name = str(grp_name) + '_grp')
+        grp_offset = cmds.group(empty = 1, name = str(grp_name) + '_grp_offset')
+        grp_pos = cmds.group(empty = 1, name = str(grp_name) + '_grp_pos')
+        
+        #parent group
+        cmds.parent(moon, grp)
+        cmds.parent(grp, grp_offset)
+        cmds.parent(grp_offset, grp_pos)
+        cmds.parent(grp_pos, planetName )
+        
+        #var
+        #rotate_z_random = random.uniform(0, 360)
+        rotate_y_random = random.uniform(-45, 45)
+        
+        #rotate group
+        cmds.rotate( 0, 0, rotate_y_random, grp_pos )
+        cmds.rotate( 0, rotate_y_random, 0, grp_offset )
+
+        #chek timeline
+        cmds.currentTime( '1', edit=True )
+        minTime = cmds.playbackOptions(query=1, minTime=True)
+        maxTime = cmds.playbackOptions(query=1, maxTime=True)
+        
+        #animate
+        cmds.setKeyframe(grp, at='rotateY', time=minTime, v=0)
+        cmds.setKeyframe(grp, at='rotateY', time=maxTime, v=720)
+        cmds.keyTangent(grp, inTangentType='linear', ott='linear')
+        
+    
+        #offset curve
+        cmds.select(grp)
+        cmds.keyframe(edit=True,relative=True, at='ry', timeChange = animate_offset)
+        cmds.setInfinity( pri='cycleRelative', poi='cycleRelative' )
+
+        
+#clear_scene()
+create_planet(planetRadiusMin = 6 ,planetRadiusMax = 10, planetName = "Earth", moonsMin = 5, moonsMax = 12, moonRadiusMin = 2, moonRadiusMax = 3)
+
+
+
+
+
+
