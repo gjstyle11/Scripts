@@ -1,0 +1,107 @@
+import maya.cmds as cmds
+import re
+
+def create_object(*args):
+    # check obj name
+    global object_name_field
+    object_name = cmds.textField(object_name_field, q=True, text=True)
+    selected_button = cmds.radioCollection('object_type', q=True, select=True)
+ 
+    # Check if the name contains digits
+    if re.search(r'\d', object_name):
+        cmds.error("bro come on no names starting with numbers")
+        return
+    
+    # create
+    if selected_button == 'sphere':
+        cmds.polySphere(name=object_name)
+        
+        if cmds.checkBox('group', q = 1, v = 1):
+            group_ob = cmds.group( em=True, name = object_name + '_grp' )
+            cmds.parent(object_name, group_ob)
+        
+        if cmds.checkBox('move', q = 1, v = 1):
+            cmds.xform(object_name, translation=[10, 0, 0])
+
+        if cmds.checkBox('disp', q =1, v=1):
+            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            cmds.setAttr(disp_lay + '.displayType', 1)
+            
+    elif selected_button == 'cube':
+        cmds.polyCube(name=object_name)
+    
+        if cmds.checkBox('group', q = 1, v = 1):
+            group_ob = cmds.group( em=True, name = object_name + '_grp' )
+            cmds.parent(object_name, group_ob)
+    
+        if cmds.checkBox('move', q = 1, v = 1):
+            cmds.xform(object_name, translation=[10, 0, 0])
+        
+        if cmds.checkBox('disp', q =1, v=1):
+            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            cmds.setAttr(disp_lay + '.displayType', 1)
+    
+    elif selected_button == 'cone':
+        cmds.polyCone(name=object_name)
+        
+        if cmds.checkBox('group', q = 1, v = 1):
+            group_ob = cmds.group( em=True, name = object_name + '_grp' )
+            cmds.parent(object_name, group_ob)
+    
+        if cmds.checkBox('move', q = 1, v = 1):
+            cmds.xform(object_name, translation=[10, 0, 0])
+        
+        if cmds.checkBox('disp', q =1, v=1):
+            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            cmds.setAttr(disp_lay + '.displayType', 1)
+
+
+def cancel_action(*args):
+    if cmds.window("my_window", exists=True):
+        cmds.deleteUI("my_window")
+
+def main():
+    # check window
+    if cmds.window("my_window", exists = True):
+        cmds.deleteUI("my_window")
+    
+    if cmds.windowPref("my_window", exists = True):
+        cmds.windowPref("my_window", remove = True)
+    
+    # create window
+    cmds.window("my_window", title="OKOSHKO", width = 300, height = 250, tlb = 1)
+    cmds.showWindow('my_window')
+
+    # Create layout main
+    layout = cmds.columnLayout(adj = True, rowSpacing = 15)
+
+    # object name
+    cmds.text(label="Object Name:")
+    global object_name_field
+    object_name_field = cmds.textField(w = 300, placeholderText='Enter object name')
+
+    # button objects
+    cmds.text(label="Choose Object Type:")
+    cmds.rowColumnLayout(nc=3, cw=[(1, 100), (2, 100), (3, 100)])
+    cmds.radioCollection('object_type')
+    cmds.radioButton('sphere', label='Sphere', sl=1)
+    cmds.radioButton('cube', label='Cube')
+    cmds.radioButton('cone', label='Cone')
+
+    # check box options
+    check_box_lay = cmds.columnLayout(adj=True, rowSpacing = 5, w = 300)
+    cmds.text(label='')
+    cmds.text(label='Options')
+    cmds.checkBox('group', p = check_box_lay, label = 'Put into a group',)
+    cmds.checkBox('move', p = check_box_lay, label = 'Move x by 10 unit',)
+    cmds.checkBox('disp', p = check_box_lay, label = 'Display Layer/Template',)
+
+    #last buttons
+
+    frm = cmds.rowLayout(numberOfColumns=2, columnWidth2=(150, 150,), columnAlign2=('center', 'center'), adj=True)
+    cmds.button(label = 'Create', parent = frm, w = 150, c=create_object)
+    cmds.button(label = "Cancel", parent = frm, w = 150, c = cancel_action)
+
+
+
+main()
