@@ -8,7 +8,7 @@ def create_object(*args):
     selected_button = cmds.radioCollection('object_type', q=True, select=True)
  
     # Check if the name contains digits
-    if re.search(r'\d', object_name):
+    if re.match(r'^\d', object_name):
         cmds.error("bro come on no names starting with numbers")
         return
     
