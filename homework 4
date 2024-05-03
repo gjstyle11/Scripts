@@ -14,45 +14,45 @@ def create_object(*args):
     
     # create
     if selected_button == 'sphere':
-        cmds.polySphere(name=object_name)
+        object_name_1 = cmds.polySphere(name=object_name)[0]
         
         if cmds.checkBox('group', q = 1, v = 1):
-            group_ob = cmds.group( em=True, name = object_name + '_grp' )
-            cmds.parent(object_name, group_ob)
+            group_ob = cmds.group( em=True, name = object_name_1 + '_grp' )
+            cmds.parent(object_name_1, group_ob)
         
         if cmds.checkBox('move', q = 1, v = 1):
-            cmds.xform(object_name, translation=[10, 0, 0])
+            cmds.xform(object_name_1, translation=[10, 0, 0])
 
         if cmds.checkBox('disp', q =1, v=1):
-            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            disp_lay = cmds.createDisplayLayer(name = object_name_1 + '_layer')
             cmds.setAttr(disp_lay + '.displayType', 1)
             
     elif selected_button == 'cube':
-        cmds.polyCube(name=object_name)
+        object_name_1 = cmds.polyCube(name=object_name)[0]
     
         if cmds.checkBox('group', q = 1, v = 1):
-            group_ob = cmds.group( em=True, name = object_name + '_grp' )
-            cmds.parent(object_name, group_ob)
+            group_ob = cmds.group( em=True, name = object_name_1 + '_grp' )
+            cmds.parent(object_name_1, group_ob)
     
         if cmds.checkBox('move', q = 1, v = 1):
-            cmds.xform(object_name, translation=[10, 0, 0])
+            cmds.xform(object_name_1, translation=[10, 0, 0])
         
         if cmds.checkBox('disp', q =1, v=1):
-            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            disp_lay = cmds.createDisplayLayer(name = object_name_1 + '_layer')
             cmds.setAttr(disp_lay + '.displayType', 1)
     
     elif selected_button == 'cone':
-        cmds.polyCone(name=object_name)
+        object_name_1 = cmds.polyCone(name=object_name)[0]
         
         if cmds.checkBox('group', q = 1, v = 1):
-            group_ob = cmds.group( em=True, name = object_name + '_grp' )
-            cmds.parent(object_name, group_ob)
+            group_ob = cmds.group( em=True, name = object_name_1 + '_grp' )
+            cmds.parent(object_name_1, group_ob)
     
         if cmds.checkBox('move', q = 1, v = 1):
-            cmds.xform(object_name, translation=[10, 0, 0])
+            cmds.xform(object_name_1, translation=[10, 0, 0])
         
         if cmds.checkBox('disp', q =1, v=1):
-            disp_lay = cmds.createDisplayLayer(name = object_name + '_layer')
+            disp_lay = cmds.createDisplayLayer(name = object_name_1 + '_layer')
             cmds.setAttr(disp_lay + '.displayType', 1)
 
 
