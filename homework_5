@@ -1,0 +1,161 @@
+import maya.cmds as cmds
+
+class Rocket(object):
+
+    def __init__(self, body_parts=4, length=1, radius=1, fuel_tank=1, nose_cone_height=1): # init
+        
+        self.nose_cone_height = nose_cone_height
+        self.body_parts = body_parts
+        self.length = length
+        self.radius = radius
+        self.fuel_tank = fuel_tank
+
+        meshes = cmds.ls(type='mesh')
+        transform = cmds.ls(type='transform')
+        if meshes:
+            cmds.delete(meshes)
+            cmds.delete(transform)
+        
+
+
+        self.create_body()
+        self.create_fuel_tank()
+        
+
+    def create_body(self): #create body rocket
+        
+        for i in range(self.body_parts):
+            
+            if i == 0:
+                c = cmds.polyCylinder(n='Main', height=self.length, radius=self.radius)[0]
+                cmds.xform(c, t=[0, 6, 0])
+            
+            else:
+                a = cmds.polyCylinder(name='Body_part_{}'.format(i), height=self.length, radius=self.radius)
+                
+                if i == 1:
+                    prev_bb = cmds.xform(c, q=1, ws=1, bb=1)
+                else:
+                    prev_bb = cmds.xform('Body_part_{}'.format(i-1), q=1, ws=1, bb=1)
+                cmds.xform(a[0], ws=1, t=[0, prev_bb[4], 0])
+                prev_bb = cmds.xform('Body_part_{}'.format(i), q=1, ws=1, bb=1)
+                cmds.xform(a[0], ws=1, t=[0, prev_bb[4], 0])
+                
+                #pochemu nujno 2 raza pisat' eti strochki? i pochemu ne rabotaet - cmds.xform(a[0], ws=1, t=[0, (prev_bb[4]-prev_bb[1]), 0])
+        
+        #ceate rocket tip
+
+        bb = cmds.xform('Body_part_{}'.format(i), q=1, ws=1, bb=1)
+        cmds.polyCone(name='Rocket_Tip', height=self.nose_cone_height, radius=self.radius)
+        cmds.xform('Rocket_Tip', ws=1, t=[0, bb[4], 0])
+        bb = cmds.xform('Rocket_Tip', q=1, ws=1, bb=1)
+        cmds.xform('Rocket_Tip', ws=1, t=[0, bb[4], 0])
+             # vopros tot je
+    
+    def create_fuel_tank(self): # create fuel tank
+        
+        def cone_1():
+            cmds.polyCone(name='Fuel_Tank_{}'.format(i), height=self.length*2, radius=self.radius/2 )
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[main_bb[0], main_bb[1], 0])
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[main_bb[0], bb_cone[1], 0])
+        
+        def cone_2():
+            cmds.polyCone(name='Fuel_Tank_{}'.format(i), height=self.length*2, radius=self.radius/2 )
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[main_bb[3], main_bb[1], 0])
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[main_bb[3], bb_cone[1], 0])
+        
+        def cone_3():
+            cmds.polyCone(name='Fuel_Tank_{}'.format(i), height=self.length*2, radius=self.radius/2 )
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[0, main_bb[1], main_bb[0]])
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[0, bb_cone[1], main_bb[0]])
+        
+        def cone_4():
+            cmds.polyCone(name='Fuel_Tank_{}'.format(i), height=self.length*2, radius=self.radius/2 )
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[0, main_bb[1], main_bb[5]])
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[0, bb_cone[1], main_bb[5]])
+        
+        def cone_5():
+            cmds.polyCone(name='Fuel_Tank_{}'.format(i), height=self.length*2, radius=self.radius/2 )
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[main_bb[0], main_bb[1], 0])
+            bb_cone = cmds.xform('Fuel_Tank_{}'.format(i),q=1, ws=1, bb=1)
+            cmds.xform('Fuel_Tank_{}'.format(i), t=[0, bb_cone[1], 0])
+        
+        main_bb = cmds.xform('Main', q=1, ws=1, bb=1)
+                
+        for i in range(self.fuel_tank):
+            
+            if i == 0:
+                cone_5()
+            elif i == 1:
+                cone_1()
+            elif i == 2:
+                cone_2()
+            elif i == 3:
+                cone_3()
+            elif i == 4:
+                cone_4()
+            else:
+                pass
+    
+    
+
+class Rocket_new(Rocket):
+    
+    def __init__(self, body_parts=4, length=1, radius=1, fuel_tank=1, nose_cone_height=1): # init
+        
+        super(Rocket_new, self).__init__(body_parts, length, radius, fuel_tank, nose_cone_height)
+        
+
+        self.create_escape_system()
+        self.create_fins()
+        self.create_group()
+    
+                
+    def create_fins(self): # create fins
+
+        fins = cmds.polyCube(n='fins_1', h= self.length*1.5, d=self.radius*2 )
+        bb_main = cmds.xform('Main', q=1, ws=1, bb=1)
+        deph_q=cmds.polyCube('fins_1', q=1, d=1)
+        deph_q=deph_q/2
+        cmds.xform(fins, ro=[0, 90, 0])
+        cmds.xform(fins, ws=1, t=[bb_main[0]-deph_q, bb_main[4], 0]) # tut strochek men'she uje...
+
+        fins = cmds.polyCube(n='fins_2', h= self.length*1.5, d=self.radius*2 )
+        cmds.xform(fins, ro=[0, 90, 0])
+        cmds.xform(fins, ws=1, t=[bb_main[3]+deph_q, bb_main[4], 0])
+
+        fins = cmds.polyCube(n='fins_3', h= self.length*1.5, d=self.radius*2 )
+        cmds.xform(fins, ws=1, t=[0, bb_main[4], bb_main[2]-deph_q])
+        
+        fins = cmds.polyCube(n='fins_4', h= self.length*1.5, d=self.radius*2 )
+        cmds.xform(fins, ws=1, t=[0, bb_main[4], bb_main[5]+deph_q]) 
+
+    def create_escape_system(self): # create escape system
+
+        system = cmds.polyCylinder(name='Escape_System', radius=self.radius/6, height=self.nose_cone_height*2)[0]
+        
+        bb_es = cmds.xform("Rocket_Tip", q=1, ws=1, bb=1)
+        cmds.xform(system, t=[0, bb_es[4], 0])
+        bb_es = cmds.xform(system, q=1, ws=1, bb=1)
+        cmds.xform(system, t=[0, bb_es[4], 0])
+
+    def create_group(self): # create and parent group
+
+        a = cmds.ls(type='mesh')
+        cmds.group(a, n='geo_grp')
+    
+
+
+
+
+my_rocket = Rocket_new(body_parts=3, length=6, radius=5, fuel_tank=5, nose_cone_height=6)
+#my_rocket.generateModel()                 hz kak cherez eto sdelat' zapusk...
