@@ -1,0 +1,116 @@
+import maya.cmds as cmds
+from PySide2 import QtWidgets, QtCore
+
+class MyDialog(QtWidgets.QDialog):
+    
+    def __init__(self, parent=None):
+        super(MyDialog, self).__init__(parent)
+
+        # window
+        self.setObjectName('Program_1')
+        self.setWindowTitle('HomeWork_6')
+        self.setMinimumSize(300, 150) # Width, Height in pixels
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+        
+        # main layout
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.mainLayout)
+
+        # object name input
+        self.nameLineEdit = QtWidgets.QLineEdit()
+        self.nameLineEdit.setPlaceholderText("Object Name")
+        self.mainLayout.addWidget(self.nameLineEdit)
+        
+        # radio buttons
+        self.radio_group = QtWidgets.QGroupBox()
+        self.radio_group.setMaximumHeight(50)
+        self.radio_groupLayout = QtWidgets.QHBoxLayout()
+
+        self.radio_Sphere = QtWidgets.QRadioButton('Sphere')
+        self.radio_Cube = QtWidgets.QRadioButton('Cube')
+        self.radio_Cone = QtWidgets.QRadioButton('Cone')
+        self.radio_Sphere.setChecked(True)  # Set Sphere as default checked
+
+        self.radio_groupLayout.addWidget(self.radio_Sphere)
+        self.radio_groupLayout.addWidget(self.radio_Cube)
+        self.radio_groupLayout.addWidget(self.radio_Cone)
+        
+        self.radio_group.setLayout(self.radio_groupLayout)
+        self.mainLayout.addWidget(self.radio_group)
+        
+        # slider and line edit
+        self.sliderLayout = QtWidgets.QHBoxLayout()
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.slider.setRange(0, 10)
+        self.slider.setValue(0)
+        self.sliderValue = QtWidgets.QLineEdit()
+        self.sliderValue.setReadOnly(True)
+        self.sliderValue.setText(str(self.slider.value()))
+        self.sliderLayout.addWidget(self.slider)
+        self.sliderLayout.addWidget(self.sliderValue)
+        self.mainLayout.addLayout(self.sliderLayout)
+        
+        # buttons
+        self.buttonsLayout = QtWidgets.QHBoxLayout()
+        self.button_Create = QtWidgets.QPushButton('Create')
+        self.button_Apply = QtWidgets.QPushButton('Apply')
+        self.button_Close = QtWidgets.QPushButton('Close')
+        
+        self.buttonsLayout.addWidget(self.button_Create)
+        self.buttonsLayout.addWidget(self.button_Apply)
+        self.buttonsLayout.addWidget(self.button_Close)
+        self.mainLayout.addLayout(self.buttonsLayout)
+        
+        # connect signals
+        self.button_Create.clicked.connect(self.create)
+        self.button_Apply.clicked.connect(self.apply)
+        self.button_Close.clicked.connect(self.close)
+        self.slider.valueChanged.connect(self.updateSliderValue)
+
+    def create(self):
+        # Creates a polygonal object and closes UI
+        if self.create_object():
+            self.close()
+        
+    def apply(self):
+        # Creates an object and keeps UI opened
+        self.create_object()
+
+    def create_object(self):
+        
+        obj_name = self.nameLineEdit.text()
+        
+        # Check if the name starts with a digit
+        if obj_name and obj_name[0].isdigit():
+            QtWidgets.QMessageBox.warning(self, "Invalid Name", "Object name cannot start with a digit.")
+            return False
+        
+        # Check which radio button is selected and create the appropriate object
+        if self.radio_Sphere.isChecked():
+            self.created_obj = cmds.polySphere(name=obj_name)[0]
+        elif self.radio_Cube.isChecked():
+            self.created_obj = cmds.polyCube(name=obj_name)[0]
+        else:
+            self.created_obj = cmds.polyCone(name=obj_name)[0]
+        
+        # Move the object to the current slider value
+        cmds.setAttr(f"{self.created_obj}.translateX", self.slider.value())
+        
+        return True
+
+    def updateSliderValue(self, value):
+        # Update the QLineEdit with the current slider value
+        self.sliderValue.setText(str(value))
+        
+        # Move the created object if it exists
+        if hasattr(self, 'created_obj'):
+            cmds.setAttr(f"{self.created_obj}.translateX", value)
+
+if cmds.window('myTestWindow', q=1, exists=1):
+    cmds.deleteUI('myTestWindow')
+    
+if cmds.windowPref('myTestWindow', exists=1):
+    cmds.windowPref('myTestWindow', remove=1)
+
+myUI = MyDialog()
+myUI.show()
