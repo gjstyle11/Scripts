@@ -1,0 +1,67 @@
+import maya.cmds as cmds
+from PySide2 import QtWidgets, QtCore
+from maya.app.general.mayaMixin import MayaQWidgetBaseMixin
+
+class MyDialog(MayaQWidgetBaseMixin, QtWidgets.QDialog):
+    def __init__(self):
+        super(MyDialog, self).__init__()
+
+        self.setObjectName('MyCustomWgt')
+        self.setWindowTitle('Selector Set')
+        self.setMinimumSize(300, 500)
+        
+        self.selection = []
+        self.createUI()
+
+    def createUI(self):
+        self.MainLayout = QtWidgets.QVBoxLayout()  # vert layout
+        self.MainLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.setLayout(self.MainLayout)
+        self.MainLayout.setContentsMargins(5, 5, 5, 5)
+        self.MainLayout.setSpacing(3)
+
+        # scroll area
+        self.scrollArea = QtWidgets.QScrollArea()
+        self.scrollArea.setMinimumHeight(200)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setMinimumWidth(390)
+        self.scrollArea.setMaximumWidth(390)
+        self.scrollArea.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.scrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+
+        self.scroll_area_widget = QtWidgets.QWidget()
+        self.scrollArea.setWidget(self.scroll_area_widget)
+
+        self.scroll_layout = QtWidgets.QVBoxLayout()
+        self.scroll_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.scroll_layout.setContentsMargins(5, 5, 5, 5)
+        self.scroll_layout.setSpacing(5)
+        self.scroll_area_widget.setLayout(self.scroll_layout)
+        self.MainLayout.addWidget(self.scrollArea)
+
+        self.Button = QtWidgets.QPushButton('+')
+        self.Button.clicked.connect(self.button_plus)
+        self.MainLayout.addWidget(self.Button)
+
+    def get_selection(self):
+        self.selection = cmds.ls(sl=1, l=1)
+        return self.selection
+
+    def button_plus(self):
+        
+        self.get_selection()
+        set_name = cmds.sets(self.selection, name='SelectionSet_#')
+        button = QtWidgets.QPushButton(set_name)
+        button.clicked.connect(lambda: self.select_set(set_name))
+        self.scroll_layout.addWidget(button)
+
+    def select_set(self, set_name):
+        cmds.select(set_name)
+
+if cmds.window('MyCustomWgt', q=1, exists=1):
+    cmds.deleteUI('MyCustomWgt')
+if cmds.windowPref('MyCustomWgt', exists=1):
+    cmds.windowPref('MyCustomWgt', remove=1)
+
+myUI = MyDialog()
+myUI.show()
