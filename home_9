@@ -1,0 +1,23 @@
+import re
+import os
+
+def main():
+
+    file_path = r'D:\dev\HomeWork_9\list.txt'
+    pattern = re.compile('^[+-]?[0-9]*$')
+
+    def filter_numbers(file_path):
+        with open(file_path, 'r') as file:
+            for line in file:
+                stripped_line = line.strip()
+                if pattern.match(stripped_line):
+                    stripped_line = int(stripped_line)
+                    if -1000000 <= stripped_line <= 1000000:
+                        yield stripped_line
+
+    numbers = filter_numbers(file_path)
+
+
+    for stripped_line in numbers:
+        print(stripped_line)
+main()
